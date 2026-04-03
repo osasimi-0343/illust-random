@@ -1,0 +1,265 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.wrap{padding:1.25rem 1rem 2rem;max-width:560px;margin:0 auto;font-family:var(--font-sans)}
+.top{text-align:center;margin-bottom:1.75rem}
+.top-title{font-size:15px;font-weight:500;color:var(--color-text-primary);letter-spacing:0.15em}
+.top-sub{font-size:12px;color:var(--color-text-secondary);margin-top:5px}
+.cards{display:grid;gap:10px}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px 16px;transition:border-color 0.2s,background 0.2s;position:relative}
+.card.locked{border-color:var(--color-border-primary);background:var(--color-background-secondary)}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.card-label{font-size:10.5px;font-weight:500;letter-spacing:0.14em;color:var(--color-text-secondary)}
+.lock-btn{width:26px;height:26px;border:0.5px solid var(--color-border-secondary);border-radius:6px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--color-text-tertiary);transition:all 0.15s;padding:0;flex-shrink:0}
+.lock-btn:hover{background:var(--color-background-secondary);color:var(--color-text-secondary)}
+.lock-btn.on{border-color:var(--color-border-primary);color:var(--color-text-primary);background:var(--color-background-secondary)}
+.lock-icon{width:13px;height:13px}
+.card-body{display:flex;align-items:baseline;gap:10px}
+.card-value{font-size:24px;font-weight:500;color:var(--color-text-primary);letter-spacing:-0.01em;transition:opacity 0.1s}
+.card-sub{font-size:12px;color:var(--color-text-tertiary)}
+.locked-badge{position:absolute;top:14px;right:48px;font-size:10px;color:var(--color-text-tertiary);letter-spacing:0.08em}
+.light-visual{margin-top:10px;display:flex;align-items:center;gap:8px}
+.strength-bar{display:flex;gap:3px}
+.strength-dot{width:8px;height:8px;border-radius:50%;border:0.5px solid var(--color-border-secondary)}
+.strength-dot.on{background:var(--color-text-primary);border-color:var(--color-text-primary)}
+.roll-btn{width:100%;margin-top:1.25rem;padding:13px;font-size:14px;font-weight:500;background:var(--color-text-primary);color:var(--color-background-primary);border:none;border-radius:var(--border-radius-lg);cursor:pointer;letter-spacing:0.1em;transition:opacity 0.15s,transform 0.1s}
+.roll-btn:hover{opacity:0.82}
+.roll-btn:active{transform:scale(0.98)}
+.roll-btn:disabled{opacity:0.4;cursor:not-allowed}
+@keyframes pop{0%{opacity:0.2;transform:translateY(5px)}100%{opacity:1;transform:translateY(0)}}
+.popin .card-value{animation:pop 0.22s ease-out}
+.time-pill{display:inline-block;font-size:11px;padding:3px 10px;border-radius:100px;border:0.5px solid var(--color-border-secondary);color:var(--color-text-secondary);margin-top:8px}
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <div class="top-title">イラスト設定ランダマイザー</div>
+    <div class="top-sub">ランダムボタンで設定を自動決定。鍵マークで固定できます。</div>
+  </div>
+  <div class="cards" id="cards">
+
+    <div class="card" id="card-light-pos">
+      <div class="card-header">
+        <span class="card-label">光源の位置</span>
+        <button class="lock-btn" id="lock-light-pos" onclick="toggleLock('light-pos')" title="固定">
+          <svg class="lock-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect id="lp-body" x="3" y="7.5" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
+            <path id="lp-shackle" d="M5.5 7.5V5a2.5 2.5 0 0 1 5 0v2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="card-body">
+        <span class="card-value" id="val-light-pos">—</span>
+        <span class="card-sub" id="sub-light-pos"></span>
+      </div>
+    </div>
+
+    <div class="card" id="card-light-str">
+      <div class="card-header">
+        <span class="card-label">光源の強さ</span>
+        <button class="lock-btn" id="lock-light-str" onclick="toggleLock('light-str')" title="固定">
+          <svg class="lock-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="7.5" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
+            <path d="M5.5 7.5V5a2.5 2.5 0 0 1 5 0v2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="card-body">
+        <span class="card-value" id="val-light-str">—</span>
+      </div>
+      <div class="light-visual">
+        <div class="strength-bar" id="str-bar">
+          <div class="strength-dot" id="sd1"></div>
+          <div class="strength-dot" id="sd2"></div>
+          <div class="strength-dot" id="sd3"></div>
+        </div>
+        <span style="font-size:11px;color:var(--color-text-tertiary)" id="str-desc"></span>
+      </div>
+    </div>
+
+    <div class="card" id="card-time">
+      <div class="card-header">
+        <span class="card-label">時間帯</span>
+        <button class="lock-btn" id="lock-time" onclick="toggleLock('time')" title="固定">
+          <svg class="lock-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="7.5" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
+            <path d="M5.5 7.5V5a2.5 2.5 0 0 1 5 0v2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="card-body">
+        <span class="card-value" id="val-time">—</span>
+        <span class="card-sub" id="sub-time"></span>
+      </div>
+    </div>
+
+    <div class="card" id="card-comp">
+      <div class="card-header">
+        <span class="card-label">キャラの構図</span>
+        <button class="lock-btn" id="lock-comp" onclick="toggleLock('comp')" title="固定">
+          <svg class="lock-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="7.5" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
+            <path d="M5.5 7.5V5a2.5 2.5 0 0 1 5 0v2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="card-body">
+        <span class="card-value" id="val-comp">—</span>
+        <span class="card-sub" id="sub-comp"></span>
+      </div>
+    </div>
+
+  </div>
+  <button class="roll-btn" id="roll-btn" onclick="rollAll()">ランダム決定</button>
+</div>
+
+<script>
+const DIRS = ['真上','右斜め上','真右','右斜め下','真下','左斜め下','真左','左斜め上','真正面'];
+const DEPTHS = ['手前','中間','奥'];
+const LIGHT_POS = [];
+DIRS.forEach(d=>DEPTHS.forEach(p=>LIGHT_POS.push({main:d,sub:p})));
+
+const LIGHT_STR = [
+  {label:'弱',desc:'やわらかい拡散光',lvl:1},
+  {label:'中',desc:'自然な光量',lvl:2},
+  {label:'強',desc:'硬くコントラスト強め',lvl:3}
+];
+
+const TIMES = [
+  {label:'早朝',desc:'薄い青白い光・霧'},
+  {label:'朝',desc:'暖色の斜光・長い影'},
+  {label:'夕方',desc:'橙赤の逆光・夕焼け'},
+  {label:'宵の口',desc:'藍色・街灯'},
+  {label:'深夜',desc:'月光・青白い静寂'}
+];
+
+const COMPS = [
+  {label:'アイレベル',desc:'水平アングル・自然な視点'},
+  {label:'あおり',desc:'ローアングル・迫力・威圧感'},
+  {label:'俯瞰',desc:'ハイアングル・小ささ・かわいらしさ'},
+  {label:'真俯瞰',desc:'真上から・平面的'},
+  {label:'真あおり',desc:'真下から・圧倒感'},
+  {label:'斜め俯瞰',desc:'斜め上から・空間の広がり'},
+  {label:'斜めあおり',desc:'斜め下から・ダイナミック'},
+  {label:'バストアップ',desc:'胸から上・表情重視'},
+  {label:'ウエストショット',desc:'腰から上・動きが出やすい'},
+  {label:'全身',desc:'頭から足まで・全体シルエット'},
+  {label:'後ろ姿',desc:'背面・謎・余韻'},
+  {label:'横向き',desc:'横顔・横全身'}
+];
+
+const locks = {
+  'light-pos':false,
+  'light-str':false,
+  'time':false,
+  'comp':false
+};
+
+const current = {
+  'light-pos':null,
+  'light-str':null,
+  'time':null,
+  'comp':null
+};
+
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+
+function toggleLock(id){
+  locks[id]=!locks[id];
+  const btn=document.getElementById('lock-'+id);
+  const card=document.getElementById('card-'+id);
+  btn.classList.toggle('on',locks[id]);
+  card.classList.toggle('locked',locks[id]);
+  const shackle=btn.querySelector('path');
+  if(shackle){
+    if(locks[id]){
+      shackle.setAttribute('d','M5.5 7.5V5a2.5 2.5 0 0 1 5 0');
+    } else {
+      shackle.setAttribute('d','M5.5 7.5V5a2.5 2.5 0 0 1 5 0v2.5');
+    }
+  }
+}
+
+function updateStrBar(lvl){
+  for(let i=1;i<=3;i++){
+    document.getElementById('sd'+i).classList.toggle('on',i<=lvl);
+  }
+}
+
+function setValues(pos,str,time,comp){
+  const lp=document.getElementById('val-light-pos');
+  const lps=document.getElementById('sub-light-pos');
+  lp.textContent=pos.main;
+  lps.textContent=pos.sub;
+
+  const ls=document.getElementById('val-light-str');
+  ls.textContent=str.label;
+  document.getElementById('str-desc').textContent=str.desc;
+  updateStrBar(str.lvl);
+
+  const tv=document.getElementById('val-time');
+  const ts=document.getElementById('sub-time');
+  tv.textContent=time.label;
+  ts.textContent=time.desc;
+
+  const cv=document.getElementById('val-comp');
+  const cs=document.getElementById('sub-comp');
+  cv.textContent=comp.label;
+  cs.textContent=comp.desc;
+}
+
+function rollAll(){
+  const btn=document.getElementById('roll-btn');
+  btn.disabled=true;
+
+  const newPos=locks['light-pos']?current['light-pos']:pick(LIGHT_POS);
+  const newStr=locks['light-str']?current['light-str']:pick(LIGHT_STR);
+  const newTime=locks['time']?current['time']:pick(TIMES);
+  const newComp=locks['comp']?current['comp']:pick(COMPS);
+
+  const ids=['light-pos','light-str','time','comp'];
+  ids.forEach(id=>{
+    if(!locks[id]){
+      const v=document.getElementById('val-'+id);
+      if(v){v.style.opacity='0.15';}
+    }
+  });
+
+  let tick=0;
+  const maxTick=6;
+  const interval=setInterval(()=>{
+    tick++;
+    if(!locks['light-pos']){const t=pick(LIGHT_POS);document.getElementById('val-light-pos').textContent=t.main;}
+    if(!locks['light-str']){document.getElementById('val-light-str').textContent=pick(LIGHT_STR).label;}
+    if(!locks['time']){document.getElementById('val-time').textContent=pick(TIMES).label;}
+    if(!locks['comp']){document.getElementById('val-comp').textContent=pick(COMPS).label;}
+    ids.forEach(id=>{
+      if(!locks[id]){
+        const v=document.getElementById('val-'+id);
+        if(v) v.style.opacity=String(0.15+0.7*(tick/maxTick));
+      }
+    });
+    if(tick>=maxTick){
+      clearInterval(interval);
+      current['light-pos']=newPos;
+      current['light-str']=newStr;
+      current['time']=newTime;
+      current['comp']=newComp;
+      setValues(newPos,newStr,newTime,newComp);
+      ids.forEach(id=>{
+        const v=document.getElementById('val-'+id);
+        if(v){v.style.opacity='1';}
+        const card=document.getElementById('card-'+id);
+        if(card){
+          card.classList.remove('popin');
+          void card.offsetWidth;
+          card.classList.add('popin');
+        }
+      });
+      btn.disabled=false;
+    }
+  },55);
+}
+
+rollAll();
+</script>
