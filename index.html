@@ -34,6 +34,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:#fff;
   color:rgba(40,40,70,.65);
   padding:18px 0 12px;flex-shrink:0;
 }
+  #ui-inner {
+  flex: 1;
+  overflow-y: auto;
+  /* スクロールバーを隠す設定は維持しつつ、確実にスクロールを有効化 */
+  -webkit-overflow-scrolling: touch;
+  padding: max(28px, 5vh) 0 20px; /* 下部に少し余白を追加 */
+  min-height: 0; /* Flexbox内でのスクロール崩れ防止 */
+}
 /* Cards area scrolls, footer stays pinned */
 #cards-scroll{
   flex:1;overflow-y:auto;overflow-x:hidden;
@@ -42,7 +50,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#fff;
   -webkit-overflow-scrolling:touch;
 }
 #cards-scroll::-webkit-scrollbar{display:none}
-.cards{display:grid;gap:8px}
+.cards {
+  display: grid;
+  gap: 8px;
+  padding-bottom: 40px; /* 最後のカードがフッターに被らないようにする余白 */
+}
 .card{
   background:rgba(255,255,255,.3);
   backdrop-filter:blur(18px) saturate(1.4);
@@ -576,14 +588,22 @@ function addFormOpt(){
   formOpts.push(v);inp.value='';renderFormOpts();inp.focus();
 }
 document.getElementById('form-opt-input').addEventListener('keydown',e=>{if(e.key==='Enter')addFormOpt();});
-function submitForm(){
-  const name=document.getElementById('form-name').value.trim();
-  if(!name){document.getElementById('form-name').focus();return;}
-  if(formOpts.length===0){document.getElementById('form-opt-input').focus();return;}
-  categories.push({id:'c'+catCounter++,label:name,options:[...formOpts],current:null,locked:false});
-  renderCards();closeForm();
-}
+function submitForm() {
+  const name = document.getElementById('form-name').value.trim();
+  if (!name) { document.getElementById('form-name').focus(); return; }
+  if (formOpts.length === 0) { document.getElementById('form-opt-input').focus(); return; }
+  
+  categories.push({ id: 'c' + catCounter++, label: name, options: [...formOpts], current: null, locked: false });
+  
+  renderCards();
+  closeForm();
 
+  // 追加：新しいカードが見えるように一番下へスクロール
+  setTimeout(() => {
+    const inner = document.getElementById('ui-inner');
+    inner.scrollTo({ top: inner.scrollHeight, behavior: 'smooth' });
+  }, 100);
+}
 // ── Init ──
 renderCards();
 </script>
