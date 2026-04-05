@@ -28,12 +28,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#fff;
   top: 0; left: 50%; transform: translateX(-50%);
   z-index: 30;
   width: min(420px, 92vw);
-  height: 100dvh; /* dvhを使用してスマホのツールバーに対応 */
+  height: 100dvh; /* 画面の高さに合わせる */
   display: flex;
   flex-direction: column;
-  padding: env(safe-area-inset-top, 0) 0 env(safe-area-inset-bottom, 0);
-  /* UIの隙間をレモンが通り抜けられるようにしつつ、ボタン等は触れるようにする */
-  pointer-events: none; 
+  pointer-events: none; /* UI以外の場所はレモンに触れるように */
 }
 #ui-title{
   text-align:center;font-size:13px;font-weight:500;letter-spacing:.22em;
@@ -42,11 +40,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#fff;
 }
 #ui-inner {
   flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch; /* iOSの慣性スクロール */
-  padding: max(28px, 5vh) 4px 20px; /* 左右に少し余裕を */
-  min-height: 0;
-  pointer-events: auto; /* ここだけタッチを有効にする */
+  overflow-y: auto; /* ここでスクロールさせる */
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 40px 0 20px;
+  pointer-events: auto; /* カード部分はタッチ可能に */
+  touch-action: pan-y; /* 上下スクロールのみを許可することを明示 */
 }
 /* Cards area scrolls, footer stays pinned */
 #cards-scroll{
@@ -69,6 +68,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#fff;
   border:0.5px solid rgba(140,160,210,.3);
   border-radius:13px;padding:11px 14px;
   cursor:pointer;transition:background .15s;
+  user-select: none;
+  touch-action: manipulation;
 }
 .card:active{background:rgba(240,244,255,.6)}
 .card.locked{border-color:rgba(90,130,210,.45)}
@@ -93,10 +94,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#fff;
 /* ── Footer: always visible ── */
 #ui-footer {
   flex-shrink: 0;
-  display: flex;
-  gap: 8px;
-  padding: 8px 0 max(16px, env(safe-area-inset-bottom, 16px));
-  pointer-events: auto; /* ボタンエリアを有効にする */
+  padding: 10px 0 20px;
+  pointer-events: auto; /* ボタンはタッチ可能に */
 }
 #roll-btn{
   flex:1;padding:13px;font-size:13px;font-weight:500;letter-spacing:.1em;
@@ -608,10 +607,8 @@ function addFormOpt(){
 document.getElementById('form-opt-input').addEventListener('keydown',e=>{if(e.key==='Enter')addFormOpt();});
 function submitForm() {
   const name = document.getElementById('form-name').value.trim();
-  const optInp = document.getElementById('form-opt-input');
-  
-  if (!name) { document.getElementById('form-name').focus(); return; }
-  if (formOpts.length === 0) { optInp.focus(); return; }
+  if (!name) return;
+  if (formOpts.length === 0) return;
   
   categories.push({
     id: 'c' + catCounter++,
@@ -624,11 +621,14 @@ function submitForm() {
   renderCards();
   closeForm();
 
-  // 追加されたことがわかるよう、一番下までスクロール
+  // 追加されたら一番下までスクロールさせる
   setTimeout(() => {
     const inner = document.getElementById('ui-inner');
-    inner.scrollTo({ top: inner.scrollHeight, behavior: 'smooth' });
-  }, 100);
+    inner.scrollTo({
+      top: inner.scrollHeight,
+      behavior: 'smooth'
+    });
+  }, 50);
 }
 
 // ── Init ──
