@@ -8,7 +8,6 @@
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{width:100%;height:100%;overflow:hidden;background:#fff;
   font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI',sans-serif}
-html{touch-action:manipulation}
 
 #wc-layer{
   position:fixed;top:-30px;left:-30px;right:-30px;bottom:-30px;
@@ -35,9 +34,8 @@ html{touch-action:manipulation}
 }
 #ui-inner{
   flex:1;
-  overflow-y:scroll;
+  overflow-y:auto;
   -webkit-overflow-scrolling:touch;
-  overscroll-behavior:contain;
   scrollbar-width:none;
   padding:max(28px,5vh) 0 8px;
 }
@@ -353,7 +351,7 @@ lemonEl.addEventListener('mousedown', e=>{onDown(e.clientX,e.clientY);e.preventD
 window.addEventListener('mousemove', e=>onMove(e.clientX,e.clientY));
 window.addEventListener('mouseup', onUp);
 lemonEl.addEventListener('touchstart', e=>{const t=e.touches[0];onDown(t.clientX,t.clientY);e.preventDefault();},{passive:false});
-window.addEventListener('touchmove', e=>{const t=e.touches[0];onMove(t.clientX,t.clientY);e.preventDefault();},{passive:false});
+window.addEventListener('touchmove', e=>{if(!dragging)return;const t=e.touches[0];onMove(t.clientX,t.clientY);e.preventDefault();},{passive:false});
 window.addEventListener('touchend', onUp);
 
 // ── Trail ──
